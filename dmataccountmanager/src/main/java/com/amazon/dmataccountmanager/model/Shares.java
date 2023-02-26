@@ -1,5 +1,6 @@
 package com.amazon.dmataccountmanager.model;
 
+import java.util.List;
 
 public class Shares {
 
@@ -32,12 +33,19 @@ public class Shares {
 	
 	public void prettyPrint(Shares share) {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("ShareID:\t\t"+share.shareID);
+		System.out.println("ShareID:\t"+share.shareID);
 		System.out.println("SYMBOL:\t\t"+share.symbol);
-		System.out.println("Company Name:\t\t"+share.companyName);
+		System.out.println("Company Name:\t"+share.companyName);
 		System.out.println("Share Price:\t"+share.price);
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
+	
+    public void printSharesTable(List<Shares> list) {
+        System.out.println("shareID\tsymbol\tprice\tcompanyName");
+        for (Shares obj : list) {
+            System.out.println(obj.shareID + "\t" + obj.symbol + "\t" + obj.price + "\t" + obj.companyName);
+        }
+    }
 	
 	@Override
 	public String toString() {

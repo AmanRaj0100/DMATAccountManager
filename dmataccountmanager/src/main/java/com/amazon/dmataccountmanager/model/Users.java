@@ -2,6 +2,7 @@ package com.amazon.dmataccountmanager.model;
 
 import java.util.Scanner;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 public class Users {
 
@@ -83,50 +84,9 @@ create table Users(
 		String accountBalance = scanner.nextLine();
 		if (!accountBalance.isEmpty())
 			user.accountBalance = Integer.parseInt(accountBalance);
-
 	}
 	
 	
-	public void printTable(Object object) {
-	    
-		Class<?> clazz = object.getClass();
-	    Field[] fields = clazz.getDeclaredFields();
-		
-	    String[][] data = new String[2][fields.length];
-	    data[0] = new String[fields.length];
-	    data[1] = new String[fields.length];
-		
-	    for (int i = 0; i < fields.length; i++) {
-	      Field field = fields[i];
-	      field.setAccessible(true);
-	      try {
-		        data[0][i] = field.getName();
-		        data[1][i] = String.valueOf(field.get(object));
-		      } catch (IllegalAccessException e) {
-		        e.printStackTrace();
-		      }
-		   }
-		
-	    int[] columnWidths = new int[data[0].length];
-	    
-	    for (String[] row : data) {
-	      for (int i = 0; i < row.length; i++) {
-	    	  columnWidths[i] = Math.max(columnWidths[i], row[i].length());
-	      }
-	    }
-		
-	    for (String[] row : data) {
-	      for (int i = 0; i < row.length; i++) {
-	        System.out.print("| " + row[i]);
-	        for (int j = row[i].length(); j <= columnWidths[i]; j++) {
-	          System.out.print(" ");
-	        }
-	      }
-	      System.out.println(" |");
-		}
-	}
-
-
 	@Override
 	public String toString() {
 		return "Users [userID=" + userID + ", userName=" + userName + ", accountNumber=" + accountNumber + ", password="

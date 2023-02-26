@@ -22,13 +22,19 @@ public class PortfolioManagement {
 	private PortfolioManagement() {
 	}
 	
-	public void displayPortfolio(Portfolios portfolio) {
+	public boolean displayPortfolio() {
         String sql = "SELECT * FROM Portfolios WHERE userID= '"+userSession.user.userID+"'";
         List <Portfolios> portfolios = portfoliodao.retrieve(sql);
-
-        //display the details
-        for(Portfolios portfolioDetails: portfolios) {
-            portfolio.prettyPrint(portfolioDetails);
+        
+        if(portfolios.isEmpty()) {
+        	System.out.println("No Shares in the User Portfolio");
+        	return false;
+        } else {
+        	//display the details
+            for(Portfolios portfolioDetails: portfolios) {
+                portfolio.prettyPrint(portfolioDetails);
+            }
+            return true;
         }
     }
 	

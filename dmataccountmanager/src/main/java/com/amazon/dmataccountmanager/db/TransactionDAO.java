@@ -11,7 +11,7 @@ public class TransactionDAO implements DAO<Transactions>{
 	DB db = DB.getInstance();
 
 	public int insert(Transactions object) {
-		String sql = "INSERT INTO Transactions (shareID, shareCount, pricePerShare, transactionCharges, sttCharges, type) VALUES ('"+object.shareID+"', '"+object.shareCount+"', '"+object.pricePerShare+"',"+object.transactionCharges+","+object.sttCharges+","+object.type+")";
+		String sql = "INSERT INTO Transactions (shareID, userID, shareCount, pricePerShare, transactionCharges, sttCharges, type) VALUES ('"+object.shareID+"', "+object.userID+",'"+object.shareCount+"', '"+object.pricePerShare+"',"+object.transactionCharges+","+object.sttCharges+","+object.type+")";
 		return db.executeSQL(sql);
 	}
 	
@@ -41,6 +41,7 @@ public class TransactionDAO implements DAO<Transactions>{
 				// Read the row from ResultSet and put the data into Transactions Object
 				transaction.transactionID = set.getInt("transactionID");
 				transaction.shareID = set.getInt("shareID");
+				transaction.userID = set.getInt("userID");
 				transaction.shareCount = set.getInt("shareCount");
 				transaction.pricePerShare = set.getDouble("pricePerShare");
 				transaction.transactedOn = set.getString("transactedOn");
@@ -70,6 +71,7 @@ public class TransactionDAO implements DAO<Transactions>{
 				// Read the row from ResultSet and put the data into Transactions Object
 				transaction.transactionID = set.getInt("transactionID");
 				transaction.shareID = set.getInt("shareID");
+				transaction.userID = set.getInt("userID");
 				transaction.shareCount = set.getInt("shareCount");
 				transaction.pricePerShare = set.getDouble("pricePerShare");
 				transaction.transactedOn = set.getString("transactedOn");

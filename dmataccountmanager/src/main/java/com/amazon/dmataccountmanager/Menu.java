@@ -3,7 +3,7 @@ package com.amazon.dmataccountmanager;
 import java.util.Date;
 import java.util.Scanner;
 
-import com.amazon.dmataccountmanager.controller.ShareManagement;
+import com.amazon.dmataccountmanager.controller.SharesUpdater;
 import com.amazon.dmataccountmanager.controller.TransactionManagement;
 import com.amazon.dmataccountmanager.controller.UserManagement;
 import com.amazon.dmataccountmanager.db.DB;
@@ -13,14 +13,18 @@ import com.amazon.dmataccountmanager.model.Users;
 public class Menu {
 
 	Scanner scanner = new Scanner(System.in);
+	
+	SharesUpdater shareUpdate = new SharesUpdater();
+	Thread shareUpdateThread = new Thread(shareUpdate);
+	
 	UserManagement userService = UserManagement.getInstance();
 	TransactionManagement transactionService = TransactionManagement.getInstance();
 	
 	void showMainMenu() {
 		// Initial Menu for the Application
-        while(true) {
+        while(true) {        	
         	try {
-            	System.out.println("1: Create New DMAT Account");
+            	System.out.println("1: SetUp New DMAT Account");
             	System.out.println("2: Login");
             	System.out.println("3: Quit");
             	System.out.println("Select an Option");
@@ -37,8 +41,9 @@ public class Menu {
         			
         			System.out.println();
         			System.out.println ("Successfully Registered!!!");
+        			System.out.println("---------------------------------------");
         			System.out.println("Kindly Login to Continue: ");
-        			System.out.println();
+        			break;
         			
             	case 2:
             		System.out.println("Enter Your DMAT Account Number: ");
@@ -58,6 +63,8 @@ public class Menu {
         				userSession.user = user; 
         				
                 		try {
+                			//shareUpdateThread.start() Starts the thread to update the Share table dynamically.
+                			shareUpdateThread.start();
             				showMenu();
             			}
             			catch (Exception e) {
@@ -67,9 +74,10 @@ public class Menu {
             		break;
             	
             	case 3:
-            		scanner.close();
             		DB db = DB.getInstance();
             		db.closeConnection();
+            		
+                    scanner.close();
             		System.out.println("Thank You For using DMAT Account Manager");
             		quit = true;
             		break;
@@ -114,6 +122,7 @@ public class Menu {
 	        	
 	        	switch (choice) {
 					case 0:
+						shareUpdate.stopThread();
 						System.out.println("Thank You for using the App !!");
 						quit = true;
 						break;

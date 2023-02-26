@@ -1,3 +1,0 @@
-jdbc:sqlserver://localhost:1433;databaseName=dmatdb
-sa
-Imr@j007

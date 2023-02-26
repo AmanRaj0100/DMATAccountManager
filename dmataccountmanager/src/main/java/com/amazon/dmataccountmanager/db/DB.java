@@ -6,7 +6,10 @@ import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+
+import com.amazon.dmataccountmanager.controller.SharesUpdater;
 
 //To connect and to execute SQL Statements in Database MSSQL :)
 
@@ -41,6 +44,7 @@ public class DB {
 	Connection connection;
 	Statement statement;
 	
+	
 	private static DB db = new DB();
 	
 	public static DB getInstance() {
@@ -60,8 +64,9 @@ public class DB {
 			System.out.println("Something Went Wrong");
 		}
 	}
-
-	private void createConnection() {
+	
+    
+	public void createConnection() {
 		try {
 			
 			File file = new File(FILEPATH);

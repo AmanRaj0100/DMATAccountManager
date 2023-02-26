@@ -5,20 +5,27 @@ import java.util.Scanner;
 
 import com.amazon.dmataccountmanager.db.passEncryption;
 import com.amazon.dmataccountmanager.userSession;
+import com.amazon.dmataccountmanager.db.DB;
 import com.amazon.dmataccountmanager.db.TransactionDAO;
 import com.amazon.dmataccountmanager.db.UserDAO;
+import com.amazon.dmataccountmanager.model.AccountDetails;
 import com.amazon.dmataccountmanager.model.Transactions;
 import com.amazon.dmataccountmanager.model.Users;
+
 
 
 public class UserManagement {
 	
 	Scanner scanner = new Scanner(System.in);
 	Users user = new Users();
+	AccountDetails accInfo = new AccountDetails();
 	UserDAO userdao = new UserDAO();
+	DB db = DB.getInstance();
 	TransactionDAO transactiondao = new TransactionDAO();
 	Transactions transaction = new Transactions();
 	passEncryption encrypt = passEncryption.getInstance();
+	ShareManagement shareService = ShareManagement.getInstance();
+	PortfolioManagement portfolioService = PortfolioManagement.getInstance();
 	
 	private static UserManagement manageUsers = new UserManagement();
 	
@@ -29,40 +36,6 @@ public class UserManagement {
 	private UserManagement() {
 	}
 	
-	
-/*	public void manageUser() {
-		
-		while(true) {
-			try {
-				System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-				System.out.println("1: Activate/Deactivate User");
-				System.out.println("2: Quit Managing User");
-				System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-				System.out.println("Enter Your Choice: ");
-				int choice = Integer.parseInt(scanner.nextLine());//scanner.nextInt();
-				boolean quit = false;
-				switch(choice) {
-				case 1:
-
-					break;
-					
-				case 2:
-					quit = true;
-					break;
-					
-				default:
-					
-				}
-				
-				if (quit)
-					break;
-			} catch (Exception e) {
-				System.err.println("Invalid Input"+e);
-			}
-		}
-	}*/
-	
-
 	public boolean login(Users user) {
 
 		String sql = "SELECT * FROM Users WHERE accountNumber = '"+user.accountNumber+"' AND password = '"+encrypt.encryptor(user.password)+"'";
@@ -94,12 +67,9 @@ public class UserManagement {
 	//For User
 	public void displayAccount() {
 
-        //Fetch User Detail
-        String sql = "SELECT * FROM Users WHERE accountNumber= '"+userSession.user.accountNumber+"'";
-        List <Users> userDetail = userdao.retrieve(sql);
-
         //Display the Details
-        user.prettyPrint(userDetail.get(0));
+        accInfo.printTable(userdao.fetchAccountDetails());
+        
     }
 	
 	//For User
@@ -127,13 +97,14 @@ public class UserManagement {
 	public boolean withdrawMoney() {
 		
 		System.out.println("Enter the Amount to be withdrawn: ");
-		int amount = Integer.parseInt(scanner.nextLine());
+		double amount = Double.parseDouble(scanner.nextLine());
 		
 		user.accountNumber = userSession.user.accountNumber;
-		user.accountBalance = userSession.user.accountBalance;
+		
         
-		if(amount<=user.accountBalance) {
-			user.accountBalance=user.accountBalance-amount;
+		if(amount<=userSession.user.accountBalance) {
+			userSession.user.accountBalance=userSession.user.accountBalance-amount;
+			user.accountBalance=userSession.user.accountBalance;
 			if(userdao.update(user)>0) {
 				System.out.println("Money Withdrawn Successfully");
 				return true;
@@ -151,10 +122,11 @@ public class UserManagement {
 	public boolean withdrawMoney(double amount) {
 		
 		user.accountNumber = userSession.user.accountNumber;
-		user.accountBalance = userSession.user.accountBalance;
+		
         
-		if(amount<=user.accountBalance) {
-			user.accountBalance=user.accountBalance-amount;
+		if(amount<=userSession.user.accountBalance) {
+			userSession.user.accountBalance=userSession.user.accountBalance-amount;
+			user.accountBalance=userSession.user.accountBalance;
 			if(userdao.update(user)>0) {
 				System.out.println("Money Withdrawn Successfully");
 				return true;
@@ -167,17 +139,18 @@ public class UserManagement {
 		
 		return false;
 	}
+
 	
 	//Deposit Money without parameter
 	public boolean depositMoney() {
 		
 		System.out.println("Enter the Amount to be deposited: ");
-		int amount = Integer.parseInt(scanner.nextLine());
+		double amount = Double.parseDouble(scanner.nextLine());
 		
 		user.accountNumber = userSession.user.accountNumber;
-		user.accountBalance = userSession.user.accountBalance;
         
-		user.accountBalance=user.accountBalance+amount;
+		userSession.user.accountBalance=userSession.user.accountBalance+amount;
+		user.accountBalance = userSession.user.accountBalance;
 		
 		if(userdao.update(user)>0) {
 			System.out.println("Money Deposited Successfully");
@@ -193,9 +166,9 @@ public class UserManagement {
 	public boolean depositMoney(double amount) {
 		
 		user.accountNumber = userSession.user.accountNumber;
+		
+		userSession.user.accountBalance=userSession.user.accountBalance+amount;
 		user.accountBalance = userSession.user.accountBalance;
-        
-		user.accountBalance=user.accountBalance+amount;
 		
 		if(userdao.update(user)>0) {
 			System.out.println("Money Deposited Successfully");
@@ -208,20 +181,64 @@ public class UserManagement {
 	}
 	
 	
-	public void display() {
-		
-		List <Users> userDetail = userdao.retrieve();
-		for (Users user : userDetail) {
-			user.printTable(user);
-		}
-	}
-	
-	
 	public void viewReport() {
 
-        String sql = "Select t.* from Portfolios p Inner Join Transactions t on p.transactionID = t.transactionID where p.userID = '"+userSession.user.userID+"'";
-        List <Transactions> transactionDetail = transactiondao.retrieve(sql);;
-        transaction.prettyPrint(transactionDetail.get(0));
+        System.out.println("1. View Report of all transactions");
+		System.out.println("2. View Report of all transactions between a given Date Range");
+		System.out.println("3. View Report of all transactions for a given Share");
+		
+		boolean error = false;
+		String choice = scanner.nextLine();
+		choice.trim();
+		
+		int userChoice = Integer.parseInt(choice);
+		String sql="";
+		
+		if (userChoice == 1) {
+			
+			sql = "Select * from Transactions where userID = "+userSession.user.userID;
+	        
+		}
+		
+		else if (userChoice == 2) {
+			
+			System.out.println("Enter the date range in the format YYYY-MM-DD");
+			System.out.println("Enter From Date");
+			String Date1 = scanner.nextLine();
+			System.out.println("Enter to Date");
+			String Date2 = scanner.nextLine();
 
-	}
+			sql = "Select * from Transactions where userID = "+userSession.user.userID+" and transactedOn between '"+Date1+"' and '"+Date2+"'";		
+		
+		}
+		
+		else if (userChoice == 3) {
+			System.out.println("Enter the shareID");
+			String shareID = scanner.nextLine();
+			shareID.trim();
+			if (!shareID.isBlank()) {
+				int shareDetail = Integer.parseInt(shareID);
+
+				shareService.displaySharesForReport(shareDetail);
+				
+				sql = "Select * from Transactions where userID = "+userSession.user.userID+" and shareID = "+shareDetail;
+				
+			}
+		}
+		
+		else {
+			System.err.println("Invalid User Choice");
+			error = true;
+		}
+		
+		if(!error) {
+			List <Transactions> transactionDetail = transactiondao.retrieve(sql);
+			if (!transactionDetail.isEmpty()) {
+				for (Transactions transaction : transactionDetail)
+		        	transaction.prettyPrint(transaction);
+				}else {
+					System.out.println("There are no transaction reports available to display!!");
+				}
+			}
+		}	
 }

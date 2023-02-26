@@ -1,38 +1,93 @@
 package com.amazon.dmataccountmanager;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * Unit test for simple App.
- */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+import com.amazon.dmataccountmanager.controller.UserManagement;
+import com.amazon.dmataccountmanager.db.UserDAO;
+import com.amazon.dmataccountmanager.db.passEncryption;
+import com.amazon.dmataccountmanager.model.Users;
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
+public class AppTest {
+	
+	UserManagement userService = UserManagement.getInstance();
+	passEncryption encryptor = new passEncryption();
+	UserDAO userdao = new UserDAO();
+	
+	@Test
+	public void testUserLogin() {
+		
+		System.out.println("Commented for Creating Maven build as\r\n"
+				+ " * Those Test Cases below because they were creating duplicates of Foreign Key\r\n"
+				+ " * After running it for the second time.\r\n"
+				+ " * But they are still working");
+		
+		Users user = new Users();
+		user.accountNumber = "HA075857";
+		user.password = "admin123";
+		
+		boolean result = userService.login(user);
+		
+		//Assertion -> Either Test Cases Passes or It will Fail
+		Assert.assertEquals(true, result);
+		
+	}
+	
+	/*
+	 * Commented for Creating Maven build as
+	 * Those Test Cases below because they were creating duplicates of Foreign Key
+	 * After running it for the second time.
+	 * But they are still working
+	 * 
+	 * */
+	
+	@Test
+	public void testUserRegister() {
+		
+		Users user = new Users();
+		user.userName = "Ab de Villers";
+		user.accountNumber = "AB1234";
+		user.password = encryptor.encryptor("user123");
+		user.accountBalance = 40000;
+		
+		int result = userdao.insert(user);
+		
+		//Assertion -> Either Test Cases Passes or It will Fail
+		Assert.assertTrue(result>0);
+		
+	}
+	
+	@Test
+	public void testDepositMoney() {
+		
+		Users user = new Users();
+		user.accountNumber = "HA075857";
+		user.password = "admin123";
+		
+		userService.login(user);
+		
+		userSession.user = user;
+		
+		double amount = 10260.00;
+		boolean result = userService.depositMoney(amount);
+		
+		Assert.assertEquals(true, result);
+	}
+	
+	@Test
+	public void testWithdrawMoney() {
+		
+		Users user = new Users();
+		user.accountNumber = "HA075857";
+		user.password = "admin123";
+		
+		userService.login(user);
+		
+		userSession.user = user;
+		
+		double amount = 10222.00;
+		boolean result = userService.withdrawMoney(amount);
+		
+		Assert.assertEquals(true, result);
+	}
 }

@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.amazon.dmataccountmanager.userSession;
+import com.amazon.dmataccountmanager.model.AccountDetails;
 import com.amazon.dmataccountmanager.model.Users;
 
 public class UserDAO implements DAO<Users> {
@@ -79,4 +81,35 @@ public class UserDAO implements DAO<Users> {
 		}
 		return users;
 	}
+	
+	public List<AccountDetails> fetchAccountDetails() {
+		
+		String sql = "SELECT U.userName, U.accountNumber, U.accountBalance, P.companyName, P.shareCount, (P.shareCount*S.price) AS shareValue"+
+				" FROM Users U Left Join Portfolios P ON U.userID = P.userID Left Join Shares S ON P.shareID = S.shareID WHERE U.userID ="+userSession.user.userID;
+		
+		ResultSet set = db.executeQuery(sql);
+		
+		ArrayList<AccountDetails> accData = new ArrayList<AccountDetails>();
+		
+		try {
+			
+			while(set.next()) {
+				
+				AccountDetails accdetails = new AccountDetails();
+				
+				accdetails.userName = set.getString("userName");
+				accdetails.accountNumber = set.getString("accountNumber");
+				accdetails.accountBalance = set.getDouble("accountBalance");
+				accdetails.companyName = set.getString("companyName");
+				accdetails.shareCount = set.getInt("shareCount");
+				accdetails.shareValue = set.getInt("shareValue");	
+				
+				accData.add(accdetails);
+			}
+		} catch (Exception e) {
+			System.err.println("Error in fetching Account details");
+		}
+		return accData;
+	}
+	
 }

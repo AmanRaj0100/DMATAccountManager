@@ -4,6 +4,7 @@ import com.amazon.dmataccountmanager.db.DB;
 
 public class App 
 {
+	
 	private App(){
 	}
 	
@@ -18,5 +19,6 @@ public class App
         }
         
         new Menu().showMainMenu();
+        
     }
 }
